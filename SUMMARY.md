@@ -2,8 +2,13 @@
 
 This is the summary of my book.
 
-* arale 源码
-    * [class](arale/class.md)
+* [Arale 源码](arale/README.md)
+    * [Class 类](arale/class.md)
+    * [Events 事件模块](arale/events.md)
+    * [Aspect 支持切面](arale/aspect.md)
+    * [Attribute 属性](arale/attribute.md)
+    * [Base 基类](arale/base.md)
+    * [Widget 组件基类](arale/widget.md)
 * jQuery 源码
 * underscore 源码
 * seajs 源码
