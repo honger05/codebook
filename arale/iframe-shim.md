@@ -1,238 +1,109 @@
-# 演示文档
+组件会根据传入的目标元素生成一个实例，实例化后会生成一个 iframe 插入到目标元素前，这样 iframe 的层级永远低于目标元素。
 
-- order: 1
+开发者需要手动调用 sync 方法来同步 iframe 和目标元素。
 
----
+如果是 ie6 以外的浏览器只会返回一个空实例，什么都不执行。
 
-<style>
-    .cell {
-        position:relative;
-    }
+````js
+var Shim = require('iframe-shim');
 
-    .overlay{
-        position:absolute;
-        width:200px;
-        height:50px;
-        border:1px solid green;
-        background:#fff;
-
-    }
-
-    .opacity0{
-        filter:alpha(opacity=70);
-        -moz-opacity:0.7;
-        opacity: 0.7;
-    }
-</style>
-
-### 1. 正常情况，创建一个遮罩
-
-<div id="example1" class="cell">
-    <div class="overlay opacity0" style="height:100px;">
-        .overlay
-    </div>
-    <p>
-    <select>
-        <option value="option"></option>
-    </select>
-    <select>
-        <option value="option"></option>
-    </select>
-    <select>
-        <option value="option"></option>
-    </select>
-    <select>
-        <option value="option"></option>
-    </select>
-    <select>
-        <option value="option"></option>
-    </select>
-    </p>
-    <p>
-        <input type="text" />
-    </p>
-</div>
-
-
-````javascript
-seajs.use(['index', 'jquery'], function(Shim, $){
-    // example1
-    new Shim('#example1 .overlay').sync();
-});
+// 参数 target 是需要被遮挡的目标元素，可以传 DOM Element 或 Selector
+var shim = new Shim('#target');
+shim.sync();
 ````
 
+### 源码分析
 
-### 2. 遮罩会根据 DOM 的宽高进行调节
+`Position` 工具 和 `iframe-shim` 工具 实现方式的区别：
 
-<div id="example2" class="cell">
-    <div class="overlay" style="top:50px;">
-        .overlay
-    </div>
-    <p>
-        <input type="text" value="" />
-        输入宽高，blur 输入框
-    </p>
-    <select>
-        <option value="option"></option>
-    </select>
-    <select>
-        <option value="option"></option>
-    </select>
-    <select>
-        <option value="option"></option>
-    </select>
-    <select>
-        <option value="option"></option>
-    </select>
-    <select>
-        <option value="option"></option>
-    </select>
-    <select>
-        <option value="option"></option>
-    </select>
-    <select>
-        <option value="option"></option>
-    </select>
+position 是用对象字面量的方式定义的
 
-</div>
+而 iframe-shim 是用构造函数的方式定义的，因为存在多实例情况，需要保存各自的状态信息(target)。
 
-````javascript
-seajs.use(['index', 'jquery'], function(Shim, $){
-    //example2
-    var shim2 = new Shim('#example2 .overlay')
-    shim2.sync();
+> 延伸：如果是单例模式的话，它跟对象字面量的区别在于，它可以延迟初始化。
 
-    $('#example2 input').blur(function(e){
-        var value = e.currentTarget.value;
+````js
+// target 是需要添加垫片的目标元素，可以传 `DOM Element` 或 `Selector`
+function Shim(target) {
+  // 如果选择器选了多个 DOM，则只取第一个
+  this.target = $(target).eq(0);
+}
 
-        $('#example2 .overlay').css({
-            'height': value,
-            'width': value
+// 根据目标元素计算 iframe 的显隐、宽高、定位
+Shim.prototype.sync = function() {
+    var target = this.target;
+    var iframe = this.iframe;
+
+    // 如果未传 target 则不处理
+    if (!target.length) return this;
+
+    var height = target.outerHeight();
+    var width = target.outerWidth();
+
+    // 如果目标元素隐藏，则 iframe 也隐藏
+    // jquery 判断宽高同时为 0 才算隐藏，这里判断宽高其中一个为 0 就隐藏
+    // http://api.jquery.com/hidden-selector/
+    if (!height || !width || target.is(':hidden')) {
+        iframe && iframe.hide();
+    } else {
+        // 第一次显示时才创建：as lazy as possible
+        iframe || (iframe = this.iframe = createIframe(target));
+
+        iframe.css({
+            'height': height,
+            'width': width
         });
 
-        shim2.sync();
-    });
-});
-````
+        Position.pin(iframe[0], target[0]);
+        iframe.show();
+    }
 
-### 3. 遮罩只会遮盖 border 以及内容部分，margin 则不算
+    return this;
+};
 
-<div id="example3" class="cell">
-    <div class="overlay" style="border-width:20px;margin:20px;">
-        border-width:20px;<br>
-        margin:20px;
-    </div>
-    <p>
-    <select>
-        <option value="option"></option>
-    </select>
-    <select>
-        <option value="option"></option>
-    </select>
-    <select>
-        <option value="option"></option>
-    </select>
-    <select>
-        <option value="option"></option>
-    </select>
-    <select>
-        <option value="option"></option>
-    </select>
-    </p>
-    <p>
-    <select>
-        <option value="option"></option>
-    </select>
-    <select>
-        <option value="option"></option>
-    </select>
-    <select>
-        <option value="option"></option>
-    </select>
-    <select>
-        <option value="option"></option>
-    </select>
-    <select>
-        <option value="option"></option>
-    </select>
-    </p>
-</div>
+// 销毁 iframe 等
+Shim.prototype.destroy = function() {
+    if (this.iframe) {
+        this.iframe.remove();
+        delete this.iframe;
+    }
+    delete this.target;
+};
 
-````javascript
-seajs.use(['index', 'jquery'], function(Shim, $){
-    // example3
-    new Shim('#example3 .overlay').sync();
-});
-````
+if (isIE6) {
+    module.exports = Shim;
+} else {
+    // 除了 IE6 都返回空函数
+    function Noop() {}
 
-### 4. 实例化不会生成 iframe，调用 sync 后才会创建 <a href="#" id="example4-create">点我遮罩</a>
+    Noop.prototype.sync = function() {return this};
+    Noop.prototype.destroy = Noop;
 
-<div id="example4" class="cell">
-    <div class="overlay">
-        .overlay
-    </div>
-    <select>
-        <option value="option"></option>
-    </select>
-    <select>
-        <option value="option"></option>
-    </select>
-    <select>
-        <option value="option"></option>
-    </select>
-    <select>
-        <option value="option"></option>
-    </select>
-    <select>
-        <option value="option"></option>
-    </select>
-    <select>
-        <option value="option"></option>
-    </select>
-    <select>
-        <option value="option"></option>
-    </select>
-</div>
+    module.exports = Noop;
+}
 
-````javascript
-seajs.use(['index', 'jquery'], function(Shim, $){
-    // example4
-    var shim4 = new Shim('#example4 .overlay');
-    $('#example4-create').click(function(e){
-        e.preventDefault();
-        shim4.sync();
-    });
-});
-````
+// Helpers
 
-### 5. 如果 select 或者父级元素设置了 z-index
+// 在 target 之前创建 iframe，这样就没有 z-index 问题
+// iframe 永远在 target 下方
+function createIframe(target) {
+    var css = {
+        display: 'none',
+        border: 'none',
+        opacity: 0,
+        position: 'absolute'
+    };
 
-<div id="example5" class="cell">
-    <div class="overlay opacity0" style="height:50px;z-index:10">
-        .overlay
-    </div>
-    <p style="position:relative; z-index:2;">
-    <select>
-        <option value="option"></option>
-    </select>
-    <select>
-        <option value="option"></option>
-    </select>
-    <select>
-        <option value="option"></option>
-    </select>
-    <select>
-        <option value="option"></option>
-    </select>
-    <select>
-        <option value="option"></option>
-    </select>
-    </p>
-</div>
+    // 如果 target 存在 zIndex 则设置
+    var zIndex = target.css('zIndex');
+    if (zIndex && zIndex > 0) {
+        css.zIndex = zIndex - 1;
+    }
 
-````javascript
-seajs.use(['index', 'jquery'], function(Shim, $){
-    // example1
-    new Shim('#example5 .overlay').sync();
-});
+    return $('<iframe>', {
+        src: 'javascript:\'\'', // 不加的话，https 下会弹警告
+        frameborder: 0,
+        css: css
+    }).insertBefore(target);
+}
 ````
