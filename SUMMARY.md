@@ -10,6 +10,7 @@ This is the summary of my book.
     * [Base 基类](arale/base.md)
     * [Widget 组件基类](arale/widget.md)
     * [position 定位工具类](arale/position.md)
+    * [iframe-shim IE6 遮挡 select](arale/iframe-shim.md)
 * jQuery 源码
 * underscore 源码
 * seajs 源码
