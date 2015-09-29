@@ -11,6 +11,7 @@ This is the summary of my book.
     * [Widget 组件基类](arale/widget.md)
     * [position 定位工具](arale/position.md)
     * [iframe-shim IE6 遮挡工具](arale/iframe-shim.md)
+    * [Overlay 浮层基类](arale/overlay.md)
 * jQuery 源码
 * underscore 源码
 * seajs 源码
