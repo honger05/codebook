@@ -14,10 +14,22 @@ This is the summary of my book.
     * [Overlay 浮层基类](arale/overlay.md)
     * [templatable 模板工具](arale/templatable.md)
     * [messenger 跨域通信工具](arale/messenger.md)
+    * Dialog 弹出框
+    * Validator 表单验证
+    * Select 下拉选择框
+    * Switchable 可滑动组件
+    * Autocomplete 自动补全
+    * Calendar 日历
 
 * [underscore 源码](underscore/README.md)
     * [集合 Collections](underscore/collections.md)
+    * 数组 Arrays
+    * 函数 Functions
+    * 对象 Objects
+    * 实用功能 Utility
+    * 链式语法 Chaining
 
+* lodash 源码
 * jQuery 源码
 * seajs 源码
 * alice 源码
