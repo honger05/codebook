@@ -14,8 +14,11 @@ This is the summary of my book.
     * [Overlay 浮层基类](arale/overlay.md)
     * [templatable 模板工具](arale/templatable.md)
     * [messenger 跨域通信工具](arale/messenger.md)
+
+* [underscore 源码](underscore/README.md)
+    * [集合 Collections](underscore/collections.md)
+
 * jQuery 源码
-* underscore 源码
 * seajs 源码
 * alice 源码
 * backbone 源码
