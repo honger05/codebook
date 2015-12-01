@@ -23,8 +23,8 @@ This is the summary of my book.
 
 * [underscore 源码](underscore/README.md)
     * [集合 Collections](underscore/collections.md)
-    * 数组 Arrays
-    * 函数 Functions
+    * [数组 Arrays](underscore/arrays.md)
+    * [函数 Functions](underscore/functions.md)
     * 对象 Objects
     * 实用功能 Utility
     * 链式语法 Chaining
